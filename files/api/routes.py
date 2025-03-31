@@ -34,6 +34,19 @@ def create_file_record(request: FileCreateRequest, current_user: str = Depends(g
     create_file(file_record)
     return {"file_id": file_id}
 
+@router.post("/merge")
+def merge_files(request: FileMergeRequest, current_user: str = Depends(get_current_user)):
+    # Implementación dummy para fusión de PDFs
+    merged_file_id = str(uuid.uuid4())
+    file_record = FileRecord(
+        id=merged_file_id,
+        filename="merged.pdf",
+        description="Archivo fusionado",
+        owner=current_user
+    )
+    create_file(file_record)
+    return {"merged_file_id": merged_file_id}
+
 @router.get("/{file_id}")
 def get_file_record(file_id: str, current_user: str = Depends(get_current_user)):
     file_record = get_file(file_id)
@@ -72,16 +85,3 @@ def upload_file_content(
     file_content = file.file.read()
     s3_service.upload_file(file_id, file_content)
     return {"message": "Contenido del archivo cargado correctamente"}
-
-@router.post("/merge")
-def merge_files(request: FileMergeRequest, current_user: str = Depends(get_current_user)):
-    # Implementación dummy para fusión de PDFs
-    merged_file_id = str(uuid.uuid4())
-    file_record = FileRecord(
-        id=merged_file_id,
-        filename="merged.pdf",
-        description="Archivo fusionado",
-        owner=current_user
-    )
-    create_file(file_record)
-    return {"merged_file_id": merged_file_id}
