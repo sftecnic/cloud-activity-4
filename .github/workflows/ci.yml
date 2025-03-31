@@ -14,7 +14,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          # Usa una versión disponible (ej: 3.10)
           python-version: "3.10"
 
       - name: Install Black
@@ -38,12 +37,9 @@ jobs:
           MINIO_ROOT_PASSWORD: minioadmin
         ports:
           - 9000:9000
-        # Usamos "options" para especificar el entrypoint y comando de MinIO
-        # En este caso, ejecutamos "minio server /data" a través de /bin/sh -c
-        options: >
-          --entrypoint /bin/sh
-          -c "minio server /data"
-
+        # No es necesario sobrescribir el entrypoint; el contenedor usará el valor por defecto,
+        # que ejecuta "minio server /data".
+      
     steps:
       - uses: actions/checkout@v2
 
@@ -80,5 +76,4 @@ jobs:
         with:
           context: .
           push: true
-          # Ajusta la etiqueta de la imagen a tu usuario/nombre de imagen
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/carlemany-backend:latest
