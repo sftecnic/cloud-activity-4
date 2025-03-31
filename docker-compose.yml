@@ -1,0 +1,76 @@
+version: "3.7"
+
+services:
+  carlemany-backend:
+    build:
+      context: .
+      target: carlemany-backend-base
+    image: carlemany-backend-base:latest
+    volumes:
+      - type: bind
+        source: .
+        target: /carlemany-backend
+    ports:
+      - "8080:80"
+    networks:
+      - carlemany-net
+
+  black:
+    image: carlemany-backend-base:latest
+    volumes:
+      - type: bind
+        source: ./
+        target: /carlemany-backend
+        read_only: true
+    entrypoint: sh -c "pip install black && black --config .black --check --diff ."
+    networks:
+      - carlemany-net
+
+  test:
+    image: carlemany-backend-base:latest
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ./
+        target: /carlemany-backend
+    networks:
+      - carlemany-net
+    entrypoint: sh -c "pip install pytest && pytest --maxfail=10"
+
+  test-cov:
+    image: carlemany-backend-base:latest
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ./
+        target: /carlemany-backend
+    networks:
+      - carlemany-net
+    entrypoint: sh -c "pip install pytest pytest-cov && pytest --maxfail=10 --cov --cov-report=term --cov-report=html --junitxml=tests/test-results/junit.xml"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - carlemany-net
+
+  minio:
+    image: minio/minio
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+    networks:
+      - carlemany-net
+
+networks:
+  carlemany-net:
+    driver: bridge
+
+
+
